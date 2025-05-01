@@ -1,0 +1,49 @@
+@baseUrl = https://localhost:7033
+
+### -----------------------------------------------
+### Expiration Test (Manual Execution Required)
+### -----------------------------------------------
+
+### This test demonstrates idempotency key expiration
+### Note: You'll need to modify your app settings or code to set a short expiration time (e.g., 30 seconds)
+### for this test to be practical. Otherwise, you'd have to wait for the default expiration period.
+
+### 1. Create a user with an idempotency key
+@expirationKey = expiration-test-key
+
+POST {{baseUrl}}/api/MyUser
+Content-Type: application/json
+X-Idempotency-Key: {{expirationKey}}
+
+{
+  "username": "expiration_user",
+  "email": "expiration@example.com",
+  "firstName": "Expiration",
+  "lastName": "Test"
+}
+
+### 2. Immediately repeat the request - should return the cached response
+POST {{baseUrl}}/api/MyUser
+Content-Type: application/json
+X-Idempotency-Key: {{expirationKey}}
+
+{
+  "username": "expiration_user",
+  "email": "expiration@example.com",
+  "firstName": "Expiration",
+  "lastName": "Test"
+}
+
+### 3. Wait until after the expiration time and then repeat the request
+### This should be treated as a new request (but will fail due to duplicate username)
+### IMPORTANT: You need to wait until the expiration time has passed before running this request
+POST {{baseUrl}}/api/MyUser
+Content-Type: application/json
+X-Idempotency-Key: {{expirationKey}}
+
+{
+  "username": "expiration_user_new",
+  "email": "expiration_new@example.com",
+  "firstName": "Expiration",
+  "lastName": "Test"
+}

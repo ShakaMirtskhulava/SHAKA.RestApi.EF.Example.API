@@ -1,0 +1,38 @@
+@baseUrl = https://localhost:7033
+
+### -----------------------------------------------
+### Multiple Concurrent Requests Idempotency Test
+### -----------------------------------------------
+
+### This test simulates multiple concurrent requests with the same idempotency key
+### Only one should succeed, and the rest should get the cached response
+
+@sharedKey = 12345678-1234-1234-1234-123456789012
+
+### 1. First request with the shared key
+POST {{baseUrl}}/api/MyUser
+Content-Type: application/json
+X-Idempotency-Key: {{sharedKey}}
+
+{
+  "username": "concurrent_user",
+  "email": "concurrent@example.com",
+  "firstName": "Concurrent",
+  "lastName": "Test"
+}
+
+### 2. Second request with the same key (simulating concurrent request)
+### This should return the same response as the first request
+POST {{baseUrl}}/api/MyUser
+Content-Type: application/json
+X-Idempotency-Key: {{sharedKey}}
+
+{
+  "username": "concurrent_user",
+  "email": "concurrent@example.com",
+  "firstName": "Concurrent",
+  "lastName": "Test"
+}
+
+### 3. Check that only one user was created
+GET {{baseUrl}}/api/MyUser

@@ -1,0 +1,50 @@
+@baseUrl = https://localhost:7033
+
+### -----------------------------------------------
+### Error Handling Idempotency Test
+### -----------------------------------------------
+
+### This test verifies how idempotency works with error responses
+### Responses with error status codes (e.g., 400 Bad Request) should not be cached
+
+### 1. First, create a user that we can reference
+POST {{baseUrl}}/api/MyUser
+Content-Type: application/json
+X-Idempotency-Key: {{$guid}}
+
+{
+  "username": "existing_user",
+  "email": "existing@example.com",
+  "firstName": "Existing",
+  "lastName": "User"
+}
+
+### 2. Attempt to create a user with the same username (will fail with 400)
+@errorKey = error-test-12345
+
+POST {{baseUrl}}/api/MyUser
+Content-Type: application/json
+X-Idempotency-Key: {{errorKey}}
+
+{
+  "username": "existing_user",
+  "email": "another@example.com",
+  "firstName": "Another",
+  "lastName": "User"
+}
+
+### 3. Try again with same key but different data
+### This should be processed as a new request since the previous one failed
+POST {{baseUrl}}/api/MyUser
+Content-Type: application/json
+X-Idempotency-Key: {{errorKey}}
+
+{
+  "username": "different_user",
+  "email": "different@example.com",
+  "firstName": "Different",
+  "lastName": "User"
+}
+
+### 4. Verify the users created
+GET {{baseUrl}}/api/MyUser

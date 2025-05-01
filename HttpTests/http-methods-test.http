@@ -1,0 +1,63 @@
+@baseUrl = https://localhost:7033
+
+### -----------------------------------------------
+### Different HTTP Methods Idempotency Test
+### -----------------------------------------------
+
+### This test demonstrates idempotency with different HTTP methods
+### Note: The idempotency middleware should be configured to apply to these methods
+
+### 1. First create a user to update later
+POST {{baseUrl}}/api/MyUser
+Content-Type: application/json
+X-Idempotency-Key: {{$guid}}
+
+{
+  "username": "methods_test_user",
+  "email": "methods@example.com",
+  "firstName": "Methods",
+  "lastName": "Test"
+}
+
+### Store the ID from the response for the PUT request
+@userId = 1015
+
+### 2. Update user with PUT request + idempotency key
+@putKey = put-idempotent-key
+
+PUT {{baseUrl}}/api/MyUser/{{userId}}
+Content-Type: application/json
+X-Idempotency-Key: {{putKey}}
+
+{
+  "username": "updated_methods_user",
+  "email": "updated_methods@example.com",
+  "firstName": "Updated",
+  "lastName": "Methods"
+}
+
+### 3. Repeat the PUT with the same idempotency key
+### This should return the cached response
+PUT {{baseUrl}}/api/MyUser/{{userId}}
+Content-Type: application/json
+X-Idempotency-Key: {{putKey}}
+
+{
+  "username": "updated_methods_user",
+  "email": "updated_methods@example.com",
+  "firstName": "Updated",
+  "lastName": "Methods"
+}
+
+### 4. Update with a different key (should succeed)
+PUT {{baseUrl}}/api/MyUser/{{userId}}
+Content-Type: application/json
+X-Idempotency-Key: {{$guid}}
+
+{
+  "firstName": "Changed Again",
+  "lastName": "User"
+}
+
+### 5. Check the user data
+GET {{baseUrl}}/api/MyUser/{{userId}}

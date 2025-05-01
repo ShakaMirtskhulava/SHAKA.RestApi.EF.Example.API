@@ -1,0 +1,61 @@
+@baseUrl = https://localhost:7033
+@idempotencyKey = {{$guid}}
+
+### -----------------------------------------------
+### Idempotency Test Scenarios with MyUser Endpoint
+### -----------------------------------------------
+
+### 1. Create a new user with idempotency key
+### This will succeed the first time
+POST {{baseUrl}}/api/MyUser
+Content-Type: application/json
+X-Idempotency-Key: 243f08a5-1ac6-4bef-bdbe-40725de5028a
+
+{
+  "username": "testuser1",
+  "email": "testuser1@example.com",
+  "firstName": "Test",
+  "lastName": "User1"
+}
+
+### 2. Repeat the exact same request with same idempotency key
+### This should return the SAME response without creating a duplicate
+POST {{baseUrl}}/api/MyUser
+Content-Type: application/json
+X-Idempotency-Key: 243f08a5-1ac6-4bef-bdbe-40725de5028a
+
+{
+  "username": "testuser1",
+  "email": "testuser1@example.com",
+  "firstName": "Test",
+  "lastName": "User1"
+}
+
+### 3. Create a new user with a different idempotency key
+### This will create a new user
+POST {{baseUrl}}/api/MyUser
+Content-Type: application/json
+X-Idempotency-Key: 343f08a5-3ac6-4bef-bdbe-40725de5023a
+
+{
+  "username": "testuser2",
+  "email": "testuser2@example.com",
+  "firstName": "Test",
+  "lastName": "User2"
+}
+
+### 4. Create a new user with the same key but different data
+### This should return the response from the first request with the same key
+POST {{baseUrl}}/api/MyUser
+Content-Type: application/json
+X-Idempotency-Key: 243f08a5-1ac6-4bef-bdbe-40725de5028a
+
+{
+  "username": "testuser3",
+  "email": "testuser3@example.com",
+  "firstName": "Different",
+  "lastName": "User"
+}
+
+### 5. List all created users
+GET {{baseUrl}}/api/MyUser
