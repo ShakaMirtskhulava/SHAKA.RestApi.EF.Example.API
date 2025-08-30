@@ -13,7 +13,6 @@ public class ApplicationDbContext : DbContext
     }
     
     public DbSet<MyUser> MyUsers { get; set; } = null!;
-    public DbSet<IdempotentRequest> IdempotentRequests { get; set; } = null!;    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {    
         base.OnModelCreating(modelBuilder);

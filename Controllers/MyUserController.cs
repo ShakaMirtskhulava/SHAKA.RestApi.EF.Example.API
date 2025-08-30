@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using SHAKA.RestApi.EF.Example.API.Data;
 using SHAKA.RestApi.EF.Example.API.DTOs;
 using SHAKA.RestApi.EF.Example.API.Models;
-using SHAKA.RestApi.Idempotency;
 
 namespace SHAKA.RestApi.EF.Example.API.Controllers;
 
